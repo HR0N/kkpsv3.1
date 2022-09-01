@@ -21,15 +21,78 @@ $tgBot = new TGBot(env::class);
 
 
 
+/* description => start cycles parsing */
+function start_cycles_parsing(){
+    global $dbase, $tgBot;
+    $watch_groups = $dbase->get_all("SELECT * FROM `categories_watch`");
+    [,$dropped_errors] = $dbase->get_dropped_errors()[0];
+    $hour_now = intval(date('H'));
+    $current_order_was_create = '';
+    $iteration_count = 0;
+    if($hour_now < 6){
+        $delay = 50;
+    }else{$delay = 10;}
+
+    $tgBot->sendMessage('-718032249', "start");
+
+    while (total_sec_in_each_five_min() < (295 - $delay)){
+        $iteration_count+=1;
+        [,$last_order] = $dbase->get_all("SELECT * FROM `last_order`")[0];
+        [,$errors_count] = $dbase->get_errors_count()[0];
+        [,$backup_order] = $dbase->get_backup_order()[0];
+        if(check_total_dropped_errors($dropped_errors)){break;} // check if total dropped errors successively > 500
+
+        $url = new_url($last_order);
+        $doc = parse_order($url);
+        $parse = fetch_order($doc);
+
+
+        if($parse){
+            $dbase->set_last_order($last_order + 1);
+            $errors_count = 0;
+            $dbase->set_errors_count($errors_count);
+            $dbase->set_dropped_errors(0);
+            $objTgMessage = create_message_and_button($parse, $url);
+            compare_groups_data_and_send_message($watch_groups, $parse, $objTgMessage);
+        }
+        else{
+            $errors_count+=1;
+            $backup_order = $dbase->get_backup_order();
+            if($errors_count == 1){
+                $dbase->set_backup_order($last_order);
+            }
+            if($errors_count == 5){
+                $errors_count = 0;
+                $dbase->set_last_order($backup_order);
+                $dbase->set_dropped_errors($dropped_errors + 1);
+            }
+            $dbase->set_last_order($last_order + 1);
+            $dbase->set_errors_count($errors_count);
+            if(check_order_page($doc)){
+                $errors_count = 0;
+                $dbase->set_errors_count($errors_count);
+                $dbase->set_last_order($backup_order);
+            }
+            }
+        $delay2 = $delay + rand(1, 4);
+        $tgBot->sendMessage('-718032249', "iteration count: ".$iteration_count.
+            "\nLast order:    ".$last_order."\nBackup order: ".$backup_order."\nErrors count: ".$errors_count
+        ."\nTotal sec: ".total_sec_in_each_five_min().$current_order_was_create);
+        $dbase->set_last_iteration_timestamp(date('d.m.y - H:i'));
+        sleep($delay2);      // delay in seconds
+    }
+}
+
 /* description => parsing page
-   return      => phpQuery document */
+   return      => phpQuery document "$doc" */
 function parse_order($url){
     $file = file_get_contents($url);
     return phpQuery::newDocument($file);
 }
 
+
 /* description => fetch parsed document to array of strings
-   return      => array of strings (order) */
+   return      => array of strings (order) || false */
 function fetch_order($doc){
     global $tgBot;
     $chatId='-718032249';
@@ -93,19 +156,69 @@ function fetch_order($doc){
         array_map(function ($val){return trim($val);}, $categories);
         $array['categories'] = $categories;
     }catch (Exception $e) {$tgBot->sendMessage($chatId, 'Categories исключение: '.$e->getMessage()."\n");}
-    return $array;
+    if(isset($title) && strlen($title > 0)){return $array;}
+    else{return false;}
 }
+
+
+/* description => check is order page has correct data
+   return      => bool */
+function check_order_page($doc){
+    global $tgBot;
+    $chatId='-718032249';
+    unset($array);
+    $exist = false;
+    try{
+        $title = trim($doc->find('h1.kb-task-details__title')->text()[0]);
+        if(isset($title) && strlen($title > 0)){$exist = true;}
+        else{$exist = false;}
+    }catch (Exception $e) {$tgBot->sendMessage($chatId, 'Title исключение: '.$e->getMessage()."\n");}
+    return $exist;
+}
+
 
 /* description => get new url use current order from db
    return      => new url */
-function new_url(){
-    global $dbase;
-    [,$last_order] = $dbase->get_all("SELECT * FROM `last_order`")[0];
+function new_url($last_order){
     return 'https://kabanchik.ua/task/'.$last_order;
 }
 
-/* description => send message to Telegram group "php console.log()"*/
-function send_php_console_log(){
+
+/* description => create message for group sending
+   return      => array(message string, button object) */
+function create_message_and_button($parse, $url){
+    // variable $tasks
+        $tasks = "Деталі: \n";
+        if(strlen(trim(implode($parse['tasks']))) >= 15){
+            foreach($parse['tasks'] as $task){
+                if(strlen(trim($task)) > 1){
+                    $tasks =  $tasks."  - ".$task."\n";
+                }
+            }
+        }else if(strlen(trim(implode($parse['tasks'])) <= 15)){$tasks = "Без деталей\n";}
+    // variable $positive
+        $positive = '';
+        if(intval(explode( ' ',$parse['review'])[1]) > 0){$positive = ', '.strtolower($parse['positive']);}
+    // variable $price
+        if(strlen($parse['price']) <= 0){$price = 'Без ціни';}else{$price = $parse['price'];}
+    // variable $current_order_was_create
+        if(isset($parse['was_created']) && strlen($parse['was_created']) > 2){$current_order_was_create = "\nCur ord.time: ".$parse['was_created'];}
+        else{$current_order_was_create = '';}
+    // variable $message
+        $message = $parse['title']."\n".$price."\n"."Було створено: ".$parse['was_created']."\n".
+            "Закінчити до: ".$parse['deadline']."\n\nКоментар: ".$parse['comment']."\n".$tasks.
+            "\nМісто: ".$parse['city']."\nКлієнт: ".$parse['client']."\n".$parse['review'].$positive;
+        $inline[] = ['text'=>'Відкрити у браузері', 'url'=>$url];
+        $inline = array_chunk($inline, 2);
+        $reply_markup = ['inline_keyboard'=>$inline];
+        $inline_keyboard = json_encode($reply_markup);
+        unset($inline);
+        return [$message, $inline_keyboard];
+}
+
+
+/* description => send message to Telegram group "php console.log()" about guest if it not crud of hosting*/
+function send_php_console_log_about_guest(){
     global $tgBot;
     $chatId='-718032249';
     $ch1 = curl_init("http://ip-api.com/php/".$_SERVER['REMOTE_ADDR']); // IP API - https://ip-api.com/docs/api:serialized_php
@@ -128,5 +241,49 @@ function send_php_console_log(){
     curl_close($ch1);
 }
 
+
+/* description => compares the data of groups and the current order. send messages to groups where it match */
+function compare_groups_data_and_send_message($watch_groups, $doc, $objTgMessage){
+    global $tgBot;
+    $php_console_log = '-718032249';
+    $categories = $doc['categories'];
+    $message    = $objTgMessage[0];
+    $button     = $objTgMessage[1];
+    foreach ($watch_groups as $group){
+        $cat1 = $categories[2];
+        $cat2 = $categories[3];
+        if(strlen($cat2) >= 5){$match = $cat2;}else{$match = $cat1;}
+        if(strripos($group[3], $match)){
+            if($group[4] == 'all'){ // if use all we don't sort, send message right away
+                $tgBot->sendMessage_mark(/*$group[2]*/$php_console_log, $message, $button);
+            }else if(isset($city) && strlen($city) > 1 && strripos($group[4], $city)){   // sort by cities
+                $tgBot->sendMessage_mark(/*$group[2]*/$php_console_log, $message, $button);
+            }
+        }
+    }
+}
+
+
+/* description => check total mount seconds of each 5 minutes
+   return      => total seconds */
+function total_sec_in_each_five_min(){
+    $min = intval(mb_substr(date('i'), 1));
+    if($min >= 5){$min-=5;}
+    $sec = intval(date('s'));
+    return $min * 60 + $sec;
+}
+
+
+/* description => check if total dropped errors successively > 500 => break */
+function check_total_dropped_errors($dropped_errors){
+    global $tgBot;
+    if($dropped_errors > 100){
+        $tgBot->sendMessage('-718032249', 'Errors successively > 500. Program was break!');
+        return true;}
+}
+
+
+
+start_cycles_parsing();
 
 //https://kabanchik-bot.evilcode.space/parsing.php

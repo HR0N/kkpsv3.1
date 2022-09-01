@@ -12,23 +12,10 @@ $iteration_count = 0;
 
 $telegram = new Api(env::$TELEGRAM_BOT_TOKEN);
 $tgDbase = new myDB(env::class);
-$result = $telegram->getWebhookUpdates();
-
-$text = strtolower($result['message']['text']);
-$chat_id = $result['message']['chat']['id'];
-$name = $result['message']['from']['username'];
-$first_name = $result['message']['from']['first_name'];
-$last_name = $result['message']['from']['last_name'];
 
 
 class TGBot{
     public $telegram;
-    public $result;
-    public $text;
-    public $chat_id;
-    public $name;
-    public $first_name;
-    public $last_name;
     public function __construct($env)
     {
         $this->telegram = new Api($env::$TELEGRAM_BOT_TOKEN);
@@ -42,20 +29,6 @@ class TGBot{
     }
 }
 
-if($text == 'status'){
-    [,$last_iteration] = $tgDbase->get_last_iteration_timestamp()[0];
-    [,$dropped_errors] = $tgDbase->get_dropped_errors()[0];
-    $reply = "Last iteration was: ".$last_iteration."\nDropped errors: ".$dropped_errors;
-    $telegram->sendMessage(['chat_id' => $chat_id, 'text' => $reply, 'parse_mode' => 'HTML']);
-}
-if($text == '/start_report'){
-    $reply = "Last iteration was: ";
-    $telegram->sendMessage(['chat_id' => $chat_id, 'text' => $reply, 'parse_mode' => 'HTML']);
-}
-if($text == '/stop_report'){
-    $reply = "Last iteration was: ";
-    $telegram->sendMessage(['chat_id' => $chat_id, 'text' => $reply, 'parse_mode' => 'HTML']);
-}
 
 //if($text == 'start'){
 //    $reply = "Hello world!";

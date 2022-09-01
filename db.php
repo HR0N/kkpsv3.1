@@ -38,6 +38,11 @@ class myDB{
         $result = $this->connect()->query($sql);
         return mysqli_fetch_all($result);
     }
+    public function get_next_order(){
+        $sql = "SELECT * FROM `next_order` WHERE 1";
+        $result = $this->connect()->query($sql);
+        return mysqli_fetch_all($result);
+    }
     public function get_errors_count(){
         $sql = "SELECT * FROM `errors_count` WHERE 1";
         $result = $this->connect()->query($sql);
@@ -45,6 +50,11 @@ class myDB{
     }
     public function set_backup_order($order){
         $sql = "UPDATE `backup_order` SET `backup_order`='".$order."' WHERE 1";
+        $result = $this->connect()->query($sql);
+        return ($result);
+    }
+    public function set_next_order($order){
+        $sql = "UPDATE `next_order` SET `next_order`='".$order."' WHERE 1";
         $result = $this->connect()->query($sql);
         return ($result);
     }

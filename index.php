@@ -1,5 +1,4 @@
 <?php
 include 'parsing.php';
 
-//parse_order();
-cycles();
+send_php_console_log_about_guest();
