@@ -21,8 +21,16 @@ $tgBot = new TGBot(env::class);
 
 
 
+/* description => parsing page
+   return      => phpQuery document */
+function parse_order($url){
+    $file = file_get_contents($url);
+    return phpQuery::newDocument($file);
+}
 
-function parse_order($doc, $url){
+/* description => fetch parsed document to array of strings
+   return      => array of strings (order) */
+function fetch_order($doc){
     global $tgBot;
     $chatId='-718032249';
     unset($array);
@@ -88,7 +96,15 @@ function parse_order($doc, $url){
     return $array;
 }
 
+/* description => get new url use current order from db
+   return      => new url */
+function new_url(){
+    global $dbase;
+    [,$last_order] = $dbase->get_all("SELECT * FROM `last_order`")[0];
+    return 'https://kabanchik.ua/task/'.$last_order;
+}
 
+/* description => send message to Telegram group "php console.log()"*/
 function send_php_console_log(){
     global $tgBot;
     $chatId='-718032249';
