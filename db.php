@@ -28,6 +28,11 @@ class myDB{
         $result = $this->connect()->query($sql);
         return mysqli_fetch_all($result);
     }
+    public function get_last_order(){
+        $sql = "SELECT * FROM `last_order` WHERE 1";
+        $result = $this->connect()->query($sql);
+        return mysqli_fetch_all($result);
+    }
     public function set_last_order($order){
         $sql = "UPDATE `last_order` SET `last_order`='".$order."' WHERE 1";
         $result = $this->connect()->query($sql);
@@ -38,8 +43,8 @@ class myDB{
         $result = $this->connect()->query($sql);
         return mysqli_fetch_all($result);
     }
-    public function get_next_order(){
-        $sql = "SELECT * FROM `next_order` WHERE 1";
+    public function get_deprecated_order(){
+        $sql = "SELECT * FROM `deprecated` WHERE 1";
         $result = $this->connect()->query($sql);
         return mysqli_fetch_all($result);
     }
@@ -53,8 +58,8 @@ class myDB{
         $result = $this->connect()->query($sql);
         return ($result);
     }
-    public function set_next_order($order){
-        $sql = "UPDATE `next_order` SET `next_order`='".$order."' WHERE 1";
+    public function set_deprecated_order($order){
+        $sql = "UPDATE `deprecated` SET `deprecated`='".$order."' WHERE 1";
         $result = $this->connect()->query($sql);
         return ($result);
     }
