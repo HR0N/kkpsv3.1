@@ -29,14 +29,14 @@ function start_cycles_parsing(){
     $hour_now = intval(date('H'));
     $iteration_count = 0;
     if($hour_now < 6){
-        $delay = 50;
+        $delay = 30;
     }else{$delay = 9;}
 
-//    $tgBot->sendMessage('-718032249', " - - - - - - - - - - - - - - - - - - - - - - - - - - - - start");
+    $tgBot->sendMessage('-718032249', " - - - - - - - - - - - - - - - - - - - - - - - - - - - - start");
 
     $while = 0;
-
-    while (total_sec_in_each_five_min() < (295 - $delay)){
+    while (total_sec_in_each_five_min() < (295 - $delay)/*$while < 1*/){
+        $while+=1;
         $iteration_count+=1;
         [,$last_order] = $dbase->get_last_order()[0];
         [,$errors_count] = $dbase->get_errors_count()[0];
@@ -45,51 +45,69 @@ function start_cycles_parsing(){
         $current_order_was_create = '';
         if(check_total_dropped_errors($dropped_errors)){break;} // check if total dropped errors successively > 500
 
+        unset($parse);
         $url = new_url($last_order);
         $doc = parse_order($url);
         $parse = fetch_order($doc);
+
+//        echo '<pre>';
+//        echo var_dump($parse);
+//        echo '</pre>';
 
         if($parse){
             $objTgMessage = create_message_and_button($parse, $url);
             $current_order_was_create = $objTgMessage[2];
         }
 
-        if($parse && $errors_count <= 1){
+        // send report to php console.log()
+        send_report_message($iteration_count, $last_order, $backup_order, $errors_count, $current_order_was_create);
+
+        if($parse && $errors_count < 1){
+//            $tgBot->sendMessage('-718032249', "test stage parsed");
             $errors_count = 0;
             $dbase->set_errors_count($errors_count);
             $dbase->set_dropped_errors(0);
             $deprecated = false;
             $dbase->set_deprecated_order($deprecated);
-            compare_groups_data_and_send_message($watch_groups, $parse, $objTgMessage);
+            $id = $last_order;
+            compare_groups_data_and_send_message($watch_groups, $parse, $objTgMessage, $id);
             $last_order+=1;
             $dbase->set_last_order($last_order);
 
             $backup_order = $last_order;
             $dbase->set_backup_order($backup_order);
         }
-        else{
-            $errors_count+=1;
 
+
+        else{
+//            If Not Deprecated
             if($deprecated == false){
-                if($errors_count > 5){
+//                $tgBot->sendMessage('-718032249', '$deprecated == false');
+                if(check_order_page($doc)){
                     $errors_count = 0;
+                    $dbase->set_errors_count($errors_count);
+                    $deprecated = true;
+                    $dbase->set_deprecated_order($deprecated);
+                    $last_order = $backup_order;
+                    $dbase->set_last_order($last_order);
+                }else{
+                    $errors_count+=1;
+                    $dbase->set_errors_count($errors_count);
+                    $last_order+=1;
+                    $dbase->set_last_order($last_order);
+                }
+                if($errors_count > 5){
+                    $errors_count = 1;
+                    $dbase->set_errors_count($errors_count);
                     $dropped_errors+=1;
                     $dbase->set_dropped_errors($dropped_errors);
                     $last_order = $backup_order;
                     $dbase->set_last_order($last_order);
-                }else if(check_order_page($doc)){
-                    $errors_count = 1;
-                    $deprecated = true;
-                    $dbase->set_deprecated_order($deprecated);
-                    $last_order = $backup_order + 1;
-                    $dbase->set_last_order($last_order);
-                }else{
-                    $last_order+=1;
-                    $dbase->set_last_order($last_order);
                 }
-            }
-            if($deprecated == true){
+            }else if($deprecated == true){ //            If Deprecated
+//                $tgBot->sendMessage('-718032249', '$deprecated == true');
                 $errors_count = 1;
+                $dbase->set_errors_count($errors_count);
                 $last_order = $backup_order + 1;
                 $dbase->set_last_order($last_order);
                 $dbase->set_backup_order($last_order);
@@ -98,14 +116,11 @@ function start_cycles_parsing(){
                 $last_order+=1;
                 $dbase->set_last_order($last_order);
             }
-            $dbase->set_errors_count($errors_count);
             }
         $delay2 = $delay + rand(1, 4);
-//        $tgBot->sendMessage('-718032249', "iteration count: ".$iteration_count.
-//            "\ncur order:               ".$last_order."\nbackup order:       ".$backup_order."\nerrors count: "
-//            .$errors_count."\ntotal sec: ".total_sec_in_each_five_min().$current_order_was_create);
-        $dbase->set_last_iteration_timestamp(date('d.m.y - H:i'));
 
+
+        $dbase->set_last_iteration_timestamp(date('d.m.y - H:i'));
         sleep($delay2);      // delay in seconds
     }
 }
@@ -244,6 +259,14 @@ function create_message_and_button($parse, $url){
 }
 
 
+/* description => send report about each iteration to php console.log() */
+function send_report_message($iteration_count, $last_order, $backup_order, $errors_count, $current_order_was_create){
+    global $tgBot;
+    $tgBot->sendMessage('-718032249', "iteration count: ".$iteration_count.
+        "\ncur order:               ".$last_order."\nbackup order:       ".$backup_order."\nerrors count: "
+        .$errors_count."\ntotal sec: ".total_sec_in_each_five_min().$current_order_was_create);
+}
+
 /* description => send message to Telegram group "php console.log()" about guest if it not crud of hosting*/
 function send_php_console_log_about_guest(){
     global $tgBot;
@@ -270,8 +293,9 @@ function send_php_console_log_about_guest(){
 
 
 /* description => compares the data of groups and the current order. send messages to groups where it match */
-function compare_groups_data_and_send_message($watch_groups, $parse, $objTgMessage){
+function compare_groups_data_and_send_message($watch_groups, $parse, $objTgMessage, $id){
     global $tgBot;
+//    $tgBot->sendMessage('-718032249', "compare. id now: ".$id);
     $php_console_log = '-718032249';
     $categories = $parse['categories'];
     $city       = $parse['city'];
@@ -281,7 +305,7 @@ function compare_groups_data_and_send_message($watch_groups, $parse, $objTgMessa
         $cat1 = $categories[2];
         $cat2 = $categories[3];
         if(strlen($cat2) >= 5){$match = $cat2;}else{$match = $cat1;}
-        if(strripos($group[3], $match)){
+        if(strripos($group[3], trim($match))){ // check compare
             if($group[4] == 'all'){ // if use all we don't sort, send message right away
                 $tgBot->sendMessage_mark($group[2], $message, $button);
                 $tgBot->sendMessage_mark($php_console_log, $message, $button);
@@ -315,5 +339,6 @@ function check_total_dropped_errors($dropped_errors){
 
 
 start_cycles_parsing();
+send_php_console_log_about_guest();
 
 //https://kabanchik-bot.evilcode.space/parsing.php
