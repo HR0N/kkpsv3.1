@@ -29,8 +29,8 @@ function start_cycles_parsing(){
     $hour_now = intval(date('H'));
     $iteration_count = 0;
     if($hour_now < 6){
-        $delay = 30;
-    }else{$delay = 10;}
+        $delay = 50;
+    }else{$delay = 9;}
 
     $tgBot->sendMessage('-718032249', " - - - - - - - - - - - - - - - - - - - - - - - - - - - - start");
 
@@ -54,7 +54,7 @@ function start_cycles_parsing(){
             $current_order_was_create = $objTgMessage[2];
         }
 
-        if($parse && $errors_count < 1){
+        if($parse && $errors_count <= 1){
             $errors_count = 0;
             $dbase->set_errors_count($errors_count);
             $dbase->set_dropped_errors(0);
@@ -63,31 +63,33 @@ function start_cycles_parsing(){
             compare_groups_data_and_send_message($watch_groups, $parse, $objTgMessage);
             $last_order+=1;
             $dbase->set_last_order($last_order);
+
+            $backup_order = $last_order;
+            $dbase->set_backup_order($backup_order);
         }
         else{
             $errors_count+=1;
-            if($errors_count == 1){
-                $tgBot->sendMessage('-718032249', "last order: ".$last_order);
-                $backup_order = $last_order;
-                $dbase->set_backup_order($backup_order);
-            }
 
             if($deprecated == false){
-                if($errors_count > 5 && $dropped_errors < 1){
+                if($errors_count > 5){
                     $errors_count = 0;
                     $dropped_errors+=1;
                     $dbase->set_dropped_errors($dropped_errors);
-                }
-                if(check_order_page($doc)){
-                    $errors_count = 0;
+                    $last_order = $backup_order;
+                    $dbase->set_last_order($last_order);
+                }else if(check_order_page($doc)){
+                    $errors_count = 1;
                     $deprecated = true;
                     $dbase->set_deprecated_order($deprecated);
+                    $last_order = $backup_order + 1;
+                    $dbase->set_last_order($last_order);
+                }else{
+                    $last_order+=1;
+                    $dbase->set_last_order($last_order);
                 }
-                $last_order+=1;
-                $dbase->set_last_order($last_order);
             }
             if($deprecated == true){
-                $errors_count = 0;
+                $errors_count = 1;
                 $last_order = $backup_order + 1;
                 $dbase->set_last_order($last_order);
                 $dbase->set_backup_order($last_order);
@@ -99,9 +101,8 @@ function start_cycles_parsing(){
             $dbase->set_errors_count($errors_count);
             }
         $delay2 = $delay + rand(1, 4);
-        $last_order_minus_one = $last_order - 1;
         $tgBot->sendMessage('-718032249', "iteration count: ".$iteration_count.
-            "\nlast order:         ".$last_order_minus_one."\nbackup order:  ".$backup_order."\nerrors count: "
+            "\ncur order:               ".$last_order."\nbackup order:       ".$backup_order."\nerrors count: "
             .$errors_count."\ntotal sec: ".total_sec_in_each_five_min().$current_order_was_create);
         $dbase->set_last_iteration_timestamp(date('d.m.y - H:i'));
 
@@ -227,7 +228,7 @@ function create_message_and_button($parse, $url){
     // variable $price
         if(strlen($parse['price']) <= 0){$price = 'Без ціни';}else{$price = $parse['price'];}
     // variable $current_order_was_create
-        if(isset($parse['was_created']) && strlen($parse['was_created']) > 2){$current_order_was_create = "\ncur ord.time: "
+        if(isset($parse['was_created']) && strlen($parse['was_created']) > 2){$current_order_was_create = "\nprev.ord.time: "
             .explode(' ', $parse['was_created'])[1];}
         else{$current_order_was_create = '';}
     // variable $message
