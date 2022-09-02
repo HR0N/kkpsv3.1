@@ -32,7 +32,7 @@ function start_cycles_parsing(){
         $delay = 50;
     }else{$delay = 9;}
 
-    $tgBot->sendMessage('-718032249', " - - - - - - - - - - - - - - - - - - - - - - - - - - - - start");
+//    $tgBot->sendMessage('-718032249', " - - - - - - - - - - - - - - - - - - - - - - - - - - - - start");
 
     $while = 0;
 
@@ -101,9 +101,9 @@ function start_cycles_parsing(){
             $dbase->set_errors_count($errors_count);
             }
         $delay2 = $delay + rand(1, 4);
-        $tgBot->sendMessage('-718032249', "iteration count: ".$iteration_count.
-            "\ncur order:               ".$last_order."\nbackup order:       ".$backup_order."\nerrors count: "
-            .$errors_count."\ntotal sec: ".total_sec_in_each_five_min().$current_order_was_create);
+//        $tgBot->sendMessage('-718032249', "iteration count: ".$iteration_count.
+//            "\ncur order:               ".$last_order."\nbackup order:       ".$backup_order."\nerrors count: "
+//            .$errors_count."\ntotal sec: ".total_sec_in_each_five_min().$current_order_was_create);
         $dbase->set_last_iteration_timestamp(date('d.m.y - H:i'));
 
         sleep($delay2);      // delay in seconds
