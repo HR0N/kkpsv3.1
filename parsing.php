@@ -308,10 +308,10 @@ function compare_groups_data_and_send_message($watch_groups, $parse, $objTgMessa
         if(strripos($group[3], trim($match))){ // check compare
             if($group[4] == 'all'){ // if use all we don't sort, send message right away
                 $tgBot->sendMessage_mark($group[2], $message, $button);
-                $tgBot->sendMessage_mark($php_console_log, $message, $button);
+//                $tgBot->sendMessage_mark($php_console_log, $message, $button);
             }else if(isset($city) && strlen($city) > 1 && strripos($group[4], $city)){   // sort by cities
                 $tgBot->sendMessage_mark($group[2], $message, $button);
-                $tgBot->sendMessage_mark($php_console_log, $message, $button);
+//                $tgBot->sendMessage_mark($php_console_log, $message, $button);
             }
         }
     }
