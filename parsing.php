@@ -267,6 +267,7 @@ function send_report_message($iteration_count, $last_order, $backup_order, $erro
         .$errors_count."\ntotal sec: ".total_sec_in_each_five_min().$current_order_was_create);
 }
 
+
 /* description => send message to Telegram group "php console.log()" about guest if it not crud of hosting*/
 function send_php_console_log_about_guest(){
     global $tgBot;
