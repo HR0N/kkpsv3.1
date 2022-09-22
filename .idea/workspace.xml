@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="36f3cf64-697e-4daa-a310-094477791a5c" name="Default Changelist" comment="" />
+    <list default="true" id="36f3cf64-697e-4daa-a310-094477791a5c" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parsing.php" beforeDir="false" afterPath="$PROJECT_DIR$/parsing.php" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -108,6 +111,13 @@
       <workItem from="1662382520720" duration="45000" />
       <workItem from="1662475153799" duration="661000" />
       <workItem from="1662546787726" duration="4035000" />
+      <workItem from="1662723500265" duration="770000" />
+      <workItem from="1662774822984" duration="329000" />
+      <workItem from="1662912170306" duration="385000" />
+      <workItem from="1662932545515" duration="604000" />
+      <workItem from="1662966032309" duration="143000" />
+      <workItem from="1662966382212" duration="534000" />
+      <workItem from="1663842442457" duration="1069000" />
     </task>
     <servers />
   </component>
@@ -119,10 +129,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="499" y="159" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1536.824@0.0.1536.824" timestamp="1659893199801" />
-    <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1662039107321">
+    <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1662966919697">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1662039107321" />
+    <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1662966919697" />
     <state x="579" y="227" key="NewPhpClassDialog" timestamp="1659895295994">
       <screen x="0" y="0" width="1536" height="824" />
     </state>

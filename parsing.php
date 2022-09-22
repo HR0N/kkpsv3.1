@@ -60,7 +60,8 @@ function start_cycles_parsing(){
         }
 
         // send report to php console.log()
-        send_report_message($iteration_count, $last_order, $backup_order, $errors_count, $current_order_was_create);
+        /*  todo: report message    */
+//        send_report_message($iteration_count, $last_order, $backup_order, $errors_count, $current_order_was_create);
 
         if($parse && $errors_count < 1){
 //            $tgBot->sendMessage('-718032249', "test stage parsed");
