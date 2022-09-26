@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="36f3cf64-697e-4daa-a310-094477791a5c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parsing.php" beforeDir="false" afterPath="$PROJECT_DIR$/parsing.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +116,9 @@
       <workItem from="1662932545515" duration="604000" />
       <workItem from="1662966032309" duration="143000" />
       <workItem from="1662966382212" duration="534000" />
-      <workItem from="1663842442457" duration="1069000" />
+      <workItem from="1663842442457" duration="1126000" />
+      <workItem from="1663926380412" duration="44000" />
+      <workItem from="1663926482074" duration="29000" />
     </task>
     <servers />
   </component>
@@ -129,10 +130,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="499" y="159" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1536.824@0.0.1536.824" timestamp="1659893199801" />
-    <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1662966919697">
+    <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1663843595061">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1662966919697" />
+    <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1663843595061" />
     <state x="579" y="227" key="NewPhpClassDialog" timestamp="1659895295994">
       <screen x="0" y="0" width="1536" height="824" />
     </state>

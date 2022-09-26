@@ -334,8 +334,8 @@ function total_sec_in_each_five_min(){
 /* description => check if total dropped errors successively > 500 => break */
 function check_total_dropped_errors($dropped_errors){
     global $tgBot;
-    if($dropped_errors > 100){
-        $tgBot->sendMessage('-718032249', 'Errors successively > 500. Program was break!');
+    if($dropped_errors > 200){
+        $tgBot->sendMessage('-718032249', 'Errors successively > 1000. Program was break!');
         return true;}
 }
 
