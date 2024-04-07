@@ -32,7 +32,7 @@ function start_cycles_parsing(){
         $delay = 30;
     }else{$delay = 9;}
 
-    $tgBot->sendMessage('-718032249', " - - - - - - - - - - - - - - - - - - - - - - - - - - - - start");
+//    $tgBot->sendMessage('-718032249', " - - - - - - - - - - - - - - - - - - - - - - - - - - - - start");
 
     $while = 0;
     while (total_sec_in_each_five_min() < (295 - $delay)/*$while < 1*/){
@@ -175,7 +175,7 @@ function fetch_order($doc){
     }catch (Exception $e) {$tgBot->sendMessage($chatId, 'Comment исключение: '.$e->getMessage()."\n");}
     try{
         $city = trim($doc->find('span.kb-execution-place__text')->text());
-        $city = trim($city);
+        $city = explode(', ', $city)[0];
         $array['city'] = $city;
     }catch (Exception $e) {$tgBot->sendMessage($chatId, 'City исключение: '.$e->getMessage()."\n");}
     try{

@@ -10,12 +10,13 @@ use mydb\myDB;
 
 
 //$dbase3 = new myDB(env::class);
-//$tgBot3 = new TGBot(env::class);
+$tgBot3 = new TGBot(env::class);
 
 header('Content-type: text/html; charset=utf-8');
 require_once __DIR__.'/libs/phpQuery-0.9.5.386-onefile/phpQuery-onefile.php';
 
 
+//$tgBot3->sendMessage(env::$TG_GROUP, 'test');
 
 /* description => parsing page
    return      => phpQuery document "$doc" */
